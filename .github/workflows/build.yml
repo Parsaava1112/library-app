@@ -18,12 +18,9 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'   # نسخه Flutter خود را مشخص کنید
+          flutter-version: '3.24.0'   # نسخه Flutter خود را دقیقاً مطابق پروژه وارد کنید
           channel: 'stable'
           cache: true
-
-      - name: Enable Windows desktop support
-        run: flutter config --enable-windows
 
       - name: Get dependencies
         run: flutter pub get
