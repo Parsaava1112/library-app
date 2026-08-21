@@ -1,23 +1,44 @@
-name: Build Android APK
+name: Build Windows Executable
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # اجرای دستی از تب Actions
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-windows:
+    runs-on: windows-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'   # 👈 نسخهٔ جدید
+          flutter-version: '3.24.0'   # نسخه Flutter خود را مشخص کنید
           channel: 'stable'
-      - run: flutter pub get
-      - run: flutter create --project-name sci_flow .
-      - run: flutter build apk --release
-      - uses: actions/upload-artifact@v4
+          cache: true
+
+      - name: Enable Windows desktop support
+        run: flutter config --enable-windows
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      # اگر از Isar یا build_runner استفاده می‌کنید این مرحله الزامی است
+      - name: Generate code (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: windows-executable
+          path: |
+            build/windows/x64/runner/Release/
+          if-no-files-found: error

@@ -1,6 +1,8 @@
-name: goulgrid
-description: A habit and task manager with gamification.
+name: school_library
+description: Offline library management for school.
+
 publish_to: 'none'
+
 version: 1.0.0+1
 
 environment:
@@ -9,32 +11,27 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-  sqflite: ^2.3.0
-  path: ^1.8.3
-  provider: ^6.0.5
-  shared_preferences: ^2.2.0
-  flutter_local_notifications: ^17.2.3
-  timezone: ^0.9.2
-  fl_chart: ^0.66.0
-  confetti: ^0.7.0
-  intl: ^0.19.0
+  # Database
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.0
+  # QR generation
+  qr_flutter: ^4.1.0
+  # Scanning (desktop + mobile)
+  flutter_zxing: ^1.4.0
+  # Printing labels
+  pdf: ^3.10.4
+  printing: ^5.11.1
+  # UI helpers
+  google_fonts: ^6.1.0
+  flutter_riverpod: ^2.4.0
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
-  flutter_launcher_icons: ^0.13.1
+  isar_generator: ^3.1.0+1
+  build_runner: ^2.4.6
 
 flutter:
   uses-material-design: true
-
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "assets/icon.png"   # مسیر تصویر آیکون شما
-  adaptive_icon_background: "#00897B"       # رنگ پس‌زمینه برای اندروید ۸ به بالا
-  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"  # (اختیاری) پیش‌زمینه
-  min_sdk_android: 21
-  remove_alpha_ios: true
