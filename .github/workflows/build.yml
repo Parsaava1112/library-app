@@ -2,14 +2,14 @@ name: Build Windows Executable
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]   # هر دو شاخه را پوشش دهید
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:  # اجرای دستی از تب Actions
 
 jobs:
   build-windows:
-    runs-on: windows-2019   # ✅ تغییر به رانر دارای VS 2019
+    runs-on: windows-latest   # ✅ فقط windows-latest (ویندوز سرور 2022)
 
     steps:
       - name: Checkout repository
@@ -18,18 +18,26 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'   # نسخه Flutter خود را وارد کنید
+          flutter-version: '3.29.0'   # ✅ از نسخه جدید استفاده کنید (۳.۲۷ به بالا)
           channel: 'stable'
           cache: true
 
       - name: Clean Flutter
         run: flutter clean
 
+      # حذف فایل‌های قدیمی CMake که ممکن است به VS 2019 اشاره کنند
+      - name: Remove old CMake files
+        shell: pwsh
+        run: |
+          Remove-Item -Path "windows/CMakeCache.txt" -ErrorAction SilentlyContinue
+          Remove-Item -Path "windows/CMakeSettings.json" -ErrorAction SilentlyContinue
+          Remove-Item -Path "build/windows" -Recurse -Force -ErrorAction SilentlyContinue
+
       - name: Get dependencies
         run: flutter pub get
 
       # اگر از Isar یا build_runner استفاده می‌کنید این مرحله الزامی است
-      - name: Generate code (build_runner)
+      - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Build Windows release
