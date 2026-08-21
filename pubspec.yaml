@@ -1,37 +1,54 @@
-name: school_library
-description: Offline library management for school.
+name: Build Windows Executable
 
-publish_to: 'none'
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
 
-version: 1.0.0+1
+jobs:
+  build-windows:
+    runs-on: windows-latest
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-dependencies:
-  flutter:
-    sdk: flutter
-  # Database
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
-  path_provider: ^2.1.0
-  # QR generation
-  qr_flutter: ^4.1.0
-  # Scanning (desktop + mobile)
-  flutter_zxing: ^1.4.0
-  # Printing labels
-  pdf: ^3.10.4
-  printing: ^5.11.1
-  # UI helpers
-  google_fonts: ^6.1.0
-  flutter_riverpod: ^2.4.0
-  intl: ^0.18.1
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'   # یا '3.27.4' یا هر نسخه دلخواه
+          channel: 'stable'
+          cache: true
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  isar_generator: ^3.1.0+1
-  build_runner: ^2.4.6
+      - name: Print Flutter version
+        run: flutter --version
 
-flutter:
-  uses-material-design: true
+      # حذف هرگونه فایل CMake قدیمی که ممکن است در مخزن باشد
+      - name: Remove old CMake files
+        shell: pwsh
+        run: |
+          if (Test-Path "windows/CMakeSettings.json") { Remove-Item "windows/CMakeSettings.json" -Force }
+          if (Test-Path "windows/CMakeCache.txt") { Remove-Item "windows/CMakeCache.txt" -Force }
+          if (Test-Path "build/windows") { Remove-Item "build/windows" -Recurse -Force }
+
+      - name: Flutter clean
+        run: flutter clean
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      # اگر از Isar یا build_runner استفاده می‌کنید این مرحله را نگه دارید
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-executable
+          path: build/windows/x64/runner/Release/
+          if-no-files-found: error
