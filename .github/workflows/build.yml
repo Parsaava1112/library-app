@@ -18,14 +18,25 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'   # نسخه دقیق
+          flutter-version: '3.29.0'   # یا نسخه‌ی دقیق دیگر
           channel: 'stable'
           cache: true
 
       - name: Print Flutter version
         run: flutter --version
 
-      # حذف کامل پوشه windows و بازسازی آن برای جلوگیری از مشکل VS2019
+      # حذف متغیرهای محیطی مربوط به نسخه‌های قدیمی Visual Studio
+      - name: Remove old Visual Studio environment variables
+        shell: pwsh
+        run: |
+          Remove-Item Env:VS160COMNTOOLS -ErrorAction SilentlyContinue
+          Remove-Item Env:VS150COMNTOOLS -ErrorAction SilentlyContinue
+          Remove-Item Env:VS140COMNTOOLS -ErrorAction SilentlyContinue
+          Remove-Item Env:VSINSTALLDIR -ErrorAction SilentlyContinue
+          # برای اطمینان، متغیر CMake generator را صریحاً تنظیم کنید
+          $env:CMAKE_GENERATOR = "Visual Studio 17 2022"
+
+      # بازسازی پوشه‌ی ویندوز برای حذف هرگونه فایل قدیمی
       - name: Regenerate Windows project
         shell: pwsh
         run: |
