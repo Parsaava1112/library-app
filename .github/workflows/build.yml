@@ -18,14 +18,14 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'   # یا نسخه‌ی دقیق مثل 3.29.0
+          flutter-version: '3.29.0'   # نسخه دقیق
           channel: 'stable'
           cache: true
 
       - name: Print Flutter version
         run: flutter --version
 
-      # حذف کامل پوشه windows و بازسازی آن
+      # حذف کامل پوشه windows و بازسازی آن برای جلوگیری از مشکل VS2019
       - name: Regenerate Windows project
         shell: pwsh
         run: |
