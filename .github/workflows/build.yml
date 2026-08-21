@@ -2,14 +2,14 @@ name: Build Windows Executable
 
 on:
   push:
-    branches: [ main, master ]   # هر دو شاخه را پوشش دهید
+    branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # اجرای دستی از تب Actions
+  workflow_dispatch:
 
 jobs:
   build-windows:
-    runs-on: windows-latest   # ✅ فقط windows-latest (ویندوز سرور 2022)
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -18,25 +18,27 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'   # ✅ از نسخه جدید استفاده کنید (۳.۲۷ به بالا)
+          flutter-version: 'stable'   # یا نسخه‌ی دقیق مثل 3.29.0
           channel: 'stable'
           cache: true
 
-      - name: Clean Flutter
-        run: flutter clean
+      - name: Print Flutter version
+        run: flutter --version
 
-      # حذف فایل‌های قدیمی CMake که ممکن است به VS 2019 اشاره کنند
-      - name: Remove old CMake files
+      # حذف کامل پوشه windows و بازسازی آن
+      - name: Regenerate Windows project
         shell: pwsh
         run: |
-          Remove-Item -Path "windows/CMakeCache.txt" -ErrorAction SilentlyContinue
-          Remove-Item -Path "windows/CMakeSettings.json" -ErrorAction SilentlyContinue
-          Remove-Item -Path "build/windows" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path "windows" -Recurse -Force -ErrorAction SilentlyContinue
+          flutter create --platforms=windows .
+
+      - name: Flutter clean
+        run: flutter clean
 
       - name: Get dependencies
         run: flutter pub get
 
-      # اگر از Isar یا build_runner استفاده می‌کنید این مرحله الزامی است
+      # اگر از Isar یا build_runner استفاده می‌کنید این مرحله را نگه دارید
       - name: Generate code
         run: dart run build_runner build --delete-conflicting-outputs
 
@@ -47,6 +49,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-executable
-          path: |
-            build/windows/x64/runner/Release/
+          path: build/windows/x64/runner/Release/
           if-no-files-found: error
